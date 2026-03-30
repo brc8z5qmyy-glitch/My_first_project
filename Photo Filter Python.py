@@ -23,6 +23,7 @@ pending_exposure = None
 pending_warmth = None
 current_exposure = 1.0
 current_warmth = 0
+active_filter = None
 
 # Приветствие
 messagebox.showinfo("Hi!", "This is my first project!")
@@ -90,6 +91,7 @@ def discard_changes():
     global brightness_var, contrast_var, shadows_var, exposure_var, warmth_var
     global current_image, original_image
     
+    
     if original_image is None:
         return
     
@@ -99,6 +101,7 @@ def discard_changes():
     current_shadows = 0
     current_exposure = 1.0
     current_warmth = 0
+    active_filter.set("none")
     # Сбрасываем pending значения
     pending_brightness = None
     pending_contrast = None
@@ -117,6 +120,7 @@ def discard_changes():
     if warmth_var is not None:
         warmth_var.set(0)
     
+    apply_all_adjustments()
     # Возвращаемся к оригинальному изображению
     current_image = original_image.copy()
     show_current_image()
@@ -269,7 +273,9 @@ def apply_setting(setting_name):
 
 def apply_all_adjustments():
     #Применяем текущие настройки к оригиналу
-    global original_image, current_image, current_brightness, current_contrast, current_shadows, current_exposure, current_warmth
+    global original_image, current_image
+    global current_brightness, current_contrast, current_shadows
+    global current_exposure, current_warmth, active_filter
     
     if original_image is None:
         return
@@ -351,6 +357,8 @@ def apply_all_adjustments():
     current_image = Image.fromarray(img_np)
     show_current_image()
 
+    
+
 def show_current_image():
     """Показывает текущую картинку в левой колонке"""
     global current_image
@@ -370,9 +378,31 @@ def show_current_image():
     image_label.image = photo
 
 def show_filters_options():
-    global current_level
+    global current_level, active_filter
     for widget in subcategory_frame.winfo_children():
         widget.destroy()
+
+    filter_original = tk.Radiobutton(subcategory_frame,text="Original",variable=active_filter,
+                   value="original",indicatoron=True)
+    filter_original.pack(anchor='w',padx=15, pady=10)    
+
+    filter_noir = tk.Radiobutton(subcategory_frame,text="Noir",variable=active_filter,
+                   value="noir",indicatoron=True)
+    filter_noir.pack(anchor='w',padx=15, pady=10)
+
+    filter_vivid = tk.Radiobutton(subcategory_frame,text="Vivid",variable=active_filter,
+                   value="vivid",indicatoron=True  )
+    filter_vivid.pack(anchor='w',padx=15,pady=10)
+
+    filter_mono = tk.Radiobutton(subcategory_frame,text="Mono",variable=active_filter,
+                   value="mono",indicatoron=True,  )
+    filter_mono.pack(anchor='w',padx=15,pady=10)
+
+    filter_silvertone = tk.Radiobutton(subcategory_frame,text="Silvertone",variable=active_filter,
+                   value="silvertone",indicatoron=True )
+    filter_silvertone.pack(anchor='w',padx=15,pady=10)
+
+
     # Кнопка "Назад" в главное меню
     btn_back = tk.Button(subcategory_frame, text="← Back", command=show_main_menu)
     btn_back.pack(pady=10)
@@ -386,6 +416,7 @@ def show_filters_options():
 
     btn_discard = tk.Button(button_panel, text="Discard", command=discard_changes, width=10)
     btn_discard.pack(side='left', padx=35)
+
 
 def show_geometry_options():
     global current_level
@@ -453,6 +484,9 @@ window = tk.Tk()
 window.title("Photo Filter")
 window.geometry("1000x600")
 window.update()
+
+active_filter = tk.StringVar()
+active_filter.set("none")
 
 # Две колонки
 #Левая колонка
