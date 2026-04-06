@@ -422,6 +422,20 @@ def show_geometry_options():
     global current_level
     for widget in subcategory_frame.winfo_children():
         widget.destroy()
+
+    btn_Rotate_90 = tk.Button(subcategory_frame, text="Rotate 90 °",  width=10)
+    btn_Rotate_90.pack(anchor='w',padx=15)
+
+    btn_to_mirror = tk.Button(subcategory_frame, text="To mirror",  width=10)
+    btn_to_mirror.pack(anchor='s',padx=15)
+
+    label_rotate = tk.Label(subcategory_frame, text="Rotate", bg='lightblue')
+    label_rotate.pack(pady=(10, 0))
+
+    scale_rotate = tk.Scale(subcategory_frame, from_=-180, to=180, orient='horizontal')
+    scale_rotate.pack(pady=(0, 10), padx=20, fill='x')
+
+
     # Кнопка "Назад" в главное меню
     btn_back = tk.Button(subcategory_frame, text="← Back", command=show_main_menu)
     btn_back.pack(pady=10)
