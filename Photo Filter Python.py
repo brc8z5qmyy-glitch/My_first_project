@@ -134,7 +134,7 @@ def on_right(scale_widget):
     scale_widget.set(scale_widget.get() + 1)
 
 def show_adjust_options():
-    """Показывает ползунки яркости, контраста, теней, экспозиции, теплоты"""
+    #Показывает ползунки яркости, контраста, теней, экспозиции, теплоты
     global current_level, brightness_var, contrast_var, shadows_var, exposure_var, warmth_var
     global original_image, current_image
     
@@ -349,6 +349,38 @@ def apply_all_adjustments():
     # 5. Контраст (умножение)
     if current_contrast != 1.0:
         img_np = cv2.convertScaleAbs(img_np, alpha=current_contrast, beta=0)
+
+    filter_value = active_filter.get()
+
+    if filter_value == "mono":
+        gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
+        gray = cv2.convertScaleAbs(gray,alpha= 1.3, beta=0)
+        img_np = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+    elif filter_value == "sepia":
+        sep_mat = np.array([
+            [0.2,0.15,0.12],
+            [0.2,0.4,0.2],
+            [0.12,0.32,0.8],
+        ],dtype=np.float32)
+        img_np = cv2.transform(img_np, sep_mat)
+        img_np = np.clip(img_np, 0, 255).astype(np.uint8)
+
+
+    elif filter_value == "hdr" :
+
+        img_np = cv2.detailEnhance(img_np, sigma_s=30, sigma_r=0.01)
+    
+    elif filter_value == "vibrance":
+        hsv = cv2.cvtColor(img_np, cv2.COLOR_BGR2HSV)
+        h, s, v = cv2.split(hsv)
+        s_float = s.astype(np.float32)
+        factor = 1.0 + (1.0 - s_float / 255.0) * 1.5
+        s_new = s_float * factor
+        s_new = np.clip(s_new, 0, 255).astype(np.uint8)
+        hsv_new = cv2.merge([h, s_new, v])
+        img_np = cv2.cvtColor(hsv_new, cv2.COLOR_HSV2BGR)
+    pass
     
     # Конвертируем обратно из BGR в RGB для PIL
     img_np = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB)
@@ -383,24 +415,24 @@ def show_filters_options():
         widget.destroy()
 
     filter_original = tk.Radiobutton(subcategory_frame,text="Original",variable=active_filter,
-                   value="original",indicatoron=True)
+                   value="original",indicatoron=True,command=apply_all_adjustments)
     filter_original.pack(anchor='w',padx=15, pady=10)    
 
-    filter_noir = tk.Radiobutton(subcategory_frame,text="Noir",variable=active_filter,
-                   value="noir",indicatoron=True)
-    filter_noir.pack(anchor='w',padx=15, pady=10)
-
-    filter_vivid = tk.Radiobutton(subcategory_frame,text="Vivid",variable=active_filter,
-                   value="vivid",indicatoron=True  )
-    filter_vivid.pack(anchor='w',padx=15,pady=10)
-
     filter_mono = tk.Radiobutton(subcategory_frame,text="Mono",variable=active_filter,
-                   value="mono",indicatoron=True,  )
-    filter_mono.pack(anchor='w',padx=15,pady=10)
+                   value="mono",indicatoron=True,command=apply_all_adjustments)
+    filter_mono.pack(anchor='w',padx=15, pady=10)
 
-    filter_silvertone = tk.Radiobutton(subcategory_frame,text="Silvertone",variable=active_filter,
-                   value="silvertone",indicatoron=True )
-    filter_silvertone.pack(anchor='w',padx=15,pady=10)
+    filter_sepia = tk.Radiobutton(subcategory_frame,text="Sepia",variable=active_filter,
+                   value="sepia",indicatoron=True,command=apply_all_adjustments  )
+    filter_sepia.pack(anchor='w',padx=15,pady=10)
+
+    filter_HDR = tk.Radiobutton(subcategory_frame,text="HDR",variable=active_filter,
+                   value="hdr",indicatoron=True,command=apply_all_adjustments  )
+    filter_HDR.pack(anchor='w',padx=15,pady=10)
+
+    filter_vibrance = tk.Radiobutton(subcategory_frame,text="Vibrance",variable=active_filter,
+                   value="vibrance",indicatoron=True,command=apply_all_adjustments )
+    filter_vibrance.pack(anchor='w',padx=15,pady=10)
 
 
     # Кнопка "Назад" в главное меню
